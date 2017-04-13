@@ -1,18 +1,17 @@
 //var mongojs = require("mongojs");
 var db = null; //mongojs('localhost:27017/myGame', ['account','progress']);
-require('./entity');
+require('./Entity');
+require('./client/Inventory');
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
-var profiler = require('v8-profiler');
-var fs = require('fs');
 
 app.get('/',function (req, res) {
     res.sendFile(__dirname + '/client/index.html');
 });
 app.use('/client',express.static(__dirname + '/client'));
 
-serv.listen(process.env.PORT || 2005);
+serv.listen(process.env.PORT || 2001);
 
 var SOCKET_LIST = {};
 
@@ -88,40 +87,29 @@ io.sockets.on('connection', function(socket) {
 
 });
 
-var initPack = {player:[],bullet:[]};
-var removePack = {player:[],bullet:[]};
-
-
 setInterval(function(){
-    var pack = {
-        player:Player.update(),
-        bullet:Bullet.update(),
-    }
-
+    var packs = Entity.getFrameUpdateData();
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
-        socket.emit('init',initPack);
-        socket.emit('update',pack);
-        socket.emit('remove',removePack);
+        socket.emit('init',packs.initPack);
+        socket.emit('update',packs.updatePack);
+        socket.emit('remove',packs.removePack);
     }
-    initPack.player = [];
-    initPack.bullet = [];
-    removePack.player = [];
-    removePack.bullet = [];
 
 },1000/25);
 
-
-var startProfiling = function(duration) {
-    profiler.startProfiling('1', true);
-    setTimeout(function() {
-        var profile1 = profiler.stopProfiling('1');
-
-        profile1.export(function (error,result) {
-            fs.writeFile('./profile.cpuprofile', result);
-            profile1.delete();
-            console.log("Profile saved.");
-        });
-    },duration);
-}
-startProfiling(10000);
+// var profiler = require('v8-profiler');
+// var fs = require('fs');
+// var startProfiling = function(duration) {
+//     profiler.startProfiling('1', true);
+//     setTimeout(function() {
+//         var profile1 = profiler.stopProfiling('1');
+//
+//         profile1.export(function (error,result) {
+//             fs.writeFile('./profile.cpuprofile', result);
+//             profile1.delete();
+//             console.log("Profile saved.");
+//         });
+//     },duration);
+// }
+// startProfiling(10000);

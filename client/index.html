@@ -22,6 +22,10 @@
             <div>Hello!</div>
         </div>
 
+        <div id="inventory">
+
+        </div>
+
         <form id="chat-form">
             <input id="chat-input" type="text" style="width: 500px">
         </form>
@@ -30,6 +34,8 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <!--<script src="/client/socket.js"></script>-->
+<script src="/client/inventory.js"></script>
+
 <script>
     var WIDTH = 500;
     var HEIGHT = 500;
@@ -100,6 +106,13 @@
     var changeMap = function() {
         socket.emit('changeMap');
     }
+
+    //inventory
+    var inventory = new Inventory(socket,false);
+    socket.on('updateInventory', function(items) {
+        inventory.items = items;
+        inventory.refreshRender();
+    });
 
     //game
     var Img = {};
@@ -246,7 +259,7 @@
     var drawMap = function () {
         var player = Player.list[selfId];
         var x = WIDTH/2 - player.x;
-        var y = WIDTH/2 - player.y;
+        var y = HEIGHT/2 - player.y;
         ctx.drawImage(Img.map[player.map],x,y);
     }
 
@@ -297,5 +310,8 @@
         socket.emit('keyPress',{inputId: 'mouseAngle', state:angle});
     }
 
+    document.oncontextmenu = function(event){
+        event.preventDefault();
+    }
 
 </script>
