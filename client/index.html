@@ -86,7 +86,12 @@
         e.preventDefault();
         if(chatInput.value[0] === '/')
             socket.emit('evalServer',chatInput.value.slice(1));
-        else
+        else if(chatInput.value[0] === '@'){
+            socket.emit('sendPmToServer',{
+                username:chatInput.value.slice(1,chatInput.value.indexOf(',')),
+                message:chatInput.value.slice(chatInput.value.indexOf(',') + 1)
+                });
+        } else
             socket.emit('sendMsgToServer', chatInput.value);
         chatInput.value = '';
     }
@@ -248,8 +253,8 @@
     var drawScore = function () {
         if(lastScore === Player.list[selfId].score)
             return;
-        ctxUi.clearRect(0,0,500,500);
         lastScore = Player.list[selfId].score;
+        ctxUi.clearRect(0,0,500,500);
         ctxUi.fillStyle = 'white';
         ctxUi.fillText(Player.list[selfId].score,0,30);
     }
